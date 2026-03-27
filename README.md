@@ -112,6 +112,7 @@ openclaw-agency-foundation/
 │   ├── company-task-entry.schema.json
 │   └── continuation-resolution.schema.json
 ├── docs/
+│   ├── install.md
 │   ├── quickstart.md
 │   ├── first-business-line.md
 │   ├── repo-profile.md
@@ -239,6 +240,29 @@ Expected external asset locations:
 ~/.gency/line-packs/<line_id>/manifest.json
 ```
 
+## Installation
+
+The project is currently source-first rather than pip-packaged.
+
+If you want the shortest path:
+
+```bash
+git clone git@github.com:xing-zhou9527/openclaw-agency-foundation.git
+cd openclaw-agency-foundation
+python3 -m compileall runtime scripts
+python3 scripts/smoke_foundation.py
+```
+
+Current install model:
+
+- repository code stays in the repo
+- deployment assets live under `~/.gency` by default
+- runtime state also lives under `~/.gency` by default
+
+For the full step-by-step guide, see:
+
+- `docs/install.md`
+
 ## Quick start
 
 ### 1. Read the design docs
@@ -341,6 +365,7 @@ If you extend this foundation, keep new capabilities aligned with the same rule:
 - `ARCHITECTURE.md` — full system model
 - `DRIFT_PREVENTION.md` — why the system resists role drift
 - `LINE_CREATION_CHECKLIST.md` — pre-instantiation checklist
+- `docs/install.md` — step-by-step installation and environment setup guide
 - `docs/quickstart.md` — fastest path to understanding the foundation
 - `docs/first-business-line.md` — step-by-step guide for instantiating the first real line
 - `docs/repo-profile.md` — suggested public repo description, topics, and framing

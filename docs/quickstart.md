@@ -20,12 +20,14 @@ If that distinction is fuzzy in your head, stop and read the design docs first.
 Recommended reading order:
 
 1. `../README.md`
-2. `../ARCHITECTURE.md`
-3. `../DRIFT_PREVENTION.md`
-4. `../LINE_CREATION_CHECKLIST.md`
+2. `./install.md`
+3. `../ARCHITECTURE.md`
+4. `../DRIFT_PREVENTION.md`
+5. `../LINE_CREATION_CHECKLIST.md`
 
 That sequence gives you:
 - project scope
+- installation path
 - system model
 - safety model
 - instantiation checklist

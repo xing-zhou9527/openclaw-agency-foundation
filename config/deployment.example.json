@@ -1,11 +1,5 @@
 {
   "deployment_name": "local-dev",
-  "home": "~/.gency",
-  "manifest_root": "~/.gency/line-packs",
-  "prompt_root": "~/.gency/prompt-packs",
-  "state_root": "~/.gency/state",
-  "lines_root": "~/.gency/state/lines",
-  "registry_root": "~/.gency/state/registry",
   "enabled_lines": [
     "marketing"
   ],
@@ -13,7 +7,8 @@
     "marketing": "line-packs/marketing/manifest.json"
   },
   "notes": [
-    "Environment variables may override any of the roots above.",
-    "Relative line_manifest_files paths resolve from the deployment manifest directory."
+    "The default deployment home is ~/.gency unless GENCY_HOME overrides it.",
+    "Relative line_manifest_files paths resolve from the deployment manifest directory.",
+    "Use environment variables or runtime arguments if you want to override manifest_root, prompt_root, state_root, lines_root, or registry_root."
   ]
 }
