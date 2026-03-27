@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/control-tower-command.schema.json",
+  "title": "Control Tower Command",
+  "type": "object",
+  "required": [
+    "request_id",
+    "command",
+    "line_id",
+    "reason",
+    "session_mode",
+    "activation_reason",
+    "activation_scope"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string"
+    },
+    "command": {
+      "type": "string",
+      "enum": [
+        "dispatch_line",
+        "request_line_meeting",
+        "query_line_status",
+        "close_task",
+        "escalate"
+      ]
+    },
+    "line_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "next_owner": {
+      "type": "string",
+      "default": ""
+    },
+    "status_note": {
+      "type": "string",
+      "default": ""
+    },
+    "session_mode": {
+      "type": "string",
+      "const": "company"
+    },
+    "activation_reason": {
+      "type": "string"
+    },
+    "activation_scope": {
+      "type": "string",
+      "enum": [
+        "request",
+        "sticky_task"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

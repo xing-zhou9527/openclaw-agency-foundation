@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/continuation-resolution.schema.json",
+  "title": "Continuation Resolution",
+  "type": "object",
+  "required": [
+    "request_id",
+    "company_task_id",
+    "line_id",
+    "current_task_id",
+    "resume_task_id",
+    "last_updated_task_id",
+    "owner_role_id",
+    "status",
+    "active_task_ids",
+    "needs_confirmation",
+    "reason"
+  ],
+  "properties": {
+    "request_id": { "type": "string" },
+    "company_task_id": { "type": ["string", "null"] },
+    "line_id": { "type": ["string", "null"] },
+    "current_task_id": { "type": ["string", "null"] },
+    "resume_task_id": { "type": ["string", "null"] },
+    "last_updated_task_id": { "type": ["string", "null"] },
+    "owner_role_id": { "type": ["string", "null"] },
+    "status": {
+      "type": ["string", "null"],
+      "enum": ["inbox", "assigned", "in_progress", "meeting", "review", "done", "blocked", "failed", null]
+    },
+    "active_task_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "needs_confirmation": { "type": "boolean" },
+    "reason": { "type": "string" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/company-task-entry.schema.json",
+  "title": "Company Task Registry Entry",
+  "type": "object",
+  "required": [
+    "company_task_id",
+    "request_id",
+    "line_id",
+    "root_task_id",
+    "current_task_id",
+    "resume_task_id",
+    "last_updated_task_id",
+    "owner_role_id",
+    "session_mode",
+    "activation_scope",
+    "activation_reason",
+    "status",
+    "mode_decision",
+    "task_ids",
+    "active_task_ids",
+    "closed_task_ids",
+    "spawned_sessions"
+  ],
+  "properties": {
+    "company_task_id": {
+      "type": "string",
+      "pattern": "^company:[a-z0-9-]+:[a-z0-9-]+$"
+    },
+    "request_id": { "type": "string" },
+    "line_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "root_task_id": { "type": "string" },
+    "current_task_id": { "type": "string" },
+    "resume_task_id": { "type": "string" },
+    "last_updated_task_id": { "type": "string" },
+    "owner_role_id": { "type": "string" },
+    "session_mode": {
+      "type": "string",
+      "const": "company"
+    },
+    "activation_scope": {
+      "type": "string",
+      "enum": ["request", "sticky_task"]
+    },
+    "activation_reason": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["inbox", "assigned", "in_progress", "meeting", "review", "done", "blocked", "failed"]
+    },
+    "mode_decision": {
+      "$ref": "./session-mode-decision.schema.json"
+    },
+    "task_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "active_task_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "closed_task_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "spawned_sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task_id", "session_key", "role_id"],
+        "properties": {
+          "task_id": { "type": "string" },
+          "session_key": { "type": "string" },
+          "role_id": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "last_completion_source": {
+      "type": ["object", "null"],
+      "required": ["task_id", "session_key", "role_id", "status", "summary", "next_step"],
+      "properties": {
+        "task_id": { "type": "string" },
+        "session_key": { "type": ["string", "null"] },
+        "role_id": { "type": ["string", "null"] },
+        "status": { "type": "string" },
+        "summary": { "type": "string" },
+        "next_step": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

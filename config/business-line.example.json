@@ -1,0 +1,55 @@
+{
+  "line_id": "marketing",
+  "objective": "Own line-scoped marketing execution from request intake to reviewed artifacts.",
+  "scope_notes": [
+    "Same-line collaboration only",
+    "Artifacts remain under the line artifact root",
+    "Cross-line dependencies must escalate through the control tower"
+  ],
+  "orchestrator_role_id": "marketing-orchestrator",
+  "meeting_moderator_role_id": "marketing-meeting-moderator",
+  "specialists": [
+    {
+      "role_id": "marketing-writer",
+      "upstream_role": "content-strategist",
+      "purpose": "Draft line-owned campaign or content artifacts",
+      "allowed_actions": ["produce_artifact", "request_meeting", "escalate"],
+      "primary_artifact_types": ["draft", "brief"]
+    },
+    {
+      "role_id": "marketing-reviewer",
+      "upstream_role": "editor",
+      "purpose": "Review artifacts before closure",
+      "allowed_actions": ["review_artifact", "request_meeting", "escalate"],
+      "primary_artifact_types": ["review", "qa-note"]
+    }
+  ],
+  "task_classes": [
+    {
+      "task_type": "build",
+      "default_owner_role_id": "marketing-writer",
+      "allowed_actions": ["produce_artifact", "request_meeting", "escalate"],
+      "requires_review": true
+    },
+    {
+      "task_type": "review",
+      "default_owner_role_id": "marketing-reviewer",
+      "allowed_actions": ["review_artifact", "request_meeting", "escalate"],
+      "requires_review": false
+    }
+  ],
+  "review_policy": {
+    "required": true,
+    "reviewer_role_ids": ["marketing-reviewer"],
+    "close_requires_review": true
+  },
+  "meetings": {
+    "enabled": true,
+    "same_line_only": true,
+    "default_round_limit": 3
+  },
+  "sessions": {
+    "spawn_strategy": "on_demand",
+    "register_spawned_sessions": true
+  }
+}

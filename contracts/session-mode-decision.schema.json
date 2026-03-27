@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/session-mode-decision.schema.json",
+  "title": "Session Mode Decision",
+  "type": "object",
+  "required": [
+    "request_id",
+    "request_kind",
+    "session_mode",
+    "reason",
+    "allow_control_tower",
+    "requires_business_execution",
+    "requires_line_ownership",
+    "continue_existing_company_task",
+    "scope",
+    "needs_confirmation"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string"
+    },
+    "request_kind": {
+      "type": "string",
+      "enum": [
+        "general_chat",
+        "knowledge_help",
+        "meta_foundation",
+        "company_operation"
+      ]
+    },
+    "session_mode": {
+      "type": "string",
+      "enum": [
+        "assistant",
+        "company"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "allow_control_tower": {
+      "type": "boolean"
+    },
+    "requires_business_execution": {
+      "type": "boolean"
+    },
+    "requires_line_ownership": {
+      "type": "boolean"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "request",
+        "sticky_task"
+      ]
+    },
+    "target_line_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "continue_existing_company_task": {
+      "type": "boolean"
+    },
+    "needs_confirmation": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

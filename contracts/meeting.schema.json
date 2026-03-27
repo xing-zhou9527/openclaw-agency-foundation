@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/meeting.schema.json",
+  "title": "Line Meeting Record",
+  "type": "object",
+  "required": [
+    "meeting_id",
+    "company_task_id",
+    "task_id",
+    "line_id",
+    "topic",
+    "moderator_role_id",
+    "participant_role_ids",
+    "agenda",
+    "round_limit",
+    "minutes_path",
+    "decision_summary",
+    "next_actions",
+    "unresolved_risks",
+    "status"
+  ],
+  "properties": {
+    "meeting_id": {
+      "type": "string",
+      "pattern": "^meeting:[a-z0-9-]+:[a-z0-9-]+$"
+    },
+    "company_task_id": {
+      "type": "string",
+      "pattern": "^company:[a-z0-9-]+:[a-z0-9-]+$"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^task:[a-z0-9-]+:[a-z0-9-]+$"
+    },
+    "line_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "topic": {
+      "type": "string"
+    },
+    "moderator_role_id": {
+      "type": "string"
+    },
+    "participant_role_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 2,
+      "uniqueItems": true
+    },
+    "agenda": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "round_limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "default": 3
+    },
+    "minutes_path": {
+      "type": "string"
+    },
+    "decision_summary": {
+      "type": "string",
+      "default": ""
+    },
+    "next_actions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "unresolved_risks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "enum": ["opened", "running", "converged", "blocked", "closed"]
+    }
+  },
+  "additionalProperties": false
+}

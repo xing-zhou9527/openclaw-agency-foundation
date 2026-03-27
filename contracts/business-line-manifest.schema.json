@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/business-line-manifest.schema.json",
+  "title": "Business Line Manifest",
+  "type": "object",
+  "required": [
+    "line_id",
+    "objective",
+    "orchestrator_role_id",
+    "meeting_moderator_role_id",
+    "specialists",
+    "task_classes",
+    "review_policy",
+    "meetings",
+    "sessions"
+  ],
+  "properties": {
+    "line_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "scope_notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "orchestrator_role_id": {
+      "type": "string"
+    },
+    "meeting_moderator_role_id": {
+      "type": "string"
+    },
+    "specialists": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "upstream_role",
+          "purpose",
+          "allowed_actions"
+        ],
+        "properties": {
+          "role_id": { "type": "string" },
+          "upstream_role": { "type": "string" },
+          "purpose": { "type": "string" },
+          "allowed_actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "produce_artifact",
+                "review_artifact",
+                "request_meeting",
+                "escalate"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "primary_artifact_types": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "task_classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "task_type",
+          "default_owner_role_id",
+          "allowed_actions",
+          "requires_review"
+        ],
+        "properties": {
+          "task_type": {
+            "type": "string",
+            "enum": ["research", "design", "build", "review", "ops", "meeting"]
+          },
+          "default_owner_role_id": { "type": "string" },
+          "allowed_actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "produce_artifact",
+                "review_artifact",
+                "request_meeting",
+                "escalate"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "requires_review": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "review_policy": {
+      "type": "object",
+      "required": ["required", "reviewer_role_ids", "close_requires_review"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "reviewer_role_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "close_requires_review": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "meetings": {
+      "type": "object",
+      "required": ["enabled", "same_line_only", "default_round_limit"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "same_line_only": { "type": "boolean", "const": true },
+        "default_round_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "sessions": {
+      "type": "object",
+      "required": ["spawn_strategy", "register_spawned_sessions"],
+      "properties": {
+        "spawn_strategy": {
+          "type": "string",
+          "enum": ["on_demand", "persistent"]
+        },
+        "register_spawned_sessions": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

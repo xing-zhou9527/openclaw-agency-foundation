@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/line.schema.json",
+  "title": "Business Line Definition",
+  "type": "object",
+  "required": [
+    "line_id",
+    "namespace",
+    "workspace_root",
+    "artifact_root",
+    "meeting_root",
+    "task_root",
+    "orchestrator_role_id",
+    "meeting_moderator_role_id"
+  ],
+  "properties": {
+    "line_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "namespace": {
+      "type": "string",
+      "pattern": "^line:[a-z0-9-]+$"
+    },
+    "workspace_root": {
+      "type": "string"
+    },
+    "artifact_root": {
+      "type": "string"
+    },
+    "meeting_root": {
+      "type": "string"
+    },
+    "task_root": {
+      "type": "string"
+    },
+    "orchestrator_role_id": {
+      "type": "string"
+    },
+    "meeting_moderator_role_id": {
+      "type": "string"
+    },
+    "allowed_role_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "cross_line_policy": {
+      "type": "string",
+      "enum": ["deny", "escalate_only"],
+      "default": "deny"
+    }
+  },
+  "additionalProperties": false
+}

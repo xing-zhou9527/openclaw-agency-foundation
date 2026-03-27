@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/task.schema.json",
+  "title": "Task Record",
+  "type": "object",
+  "required": [
+    "task_id",
+    "company_task_id",
+    "line_id",
+    "request_id",
+    "state",
+    "requested_by",
+    "assigned_by",
+    "assigned_to",
+    "task_type",
+    "allowed_actions",
+    "artifact_root",
+    "session_mode",
+    "activation_reason",
+    "activation_scope"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^task:[a-z0-9-]+:[a-z0-9-]+$"
+    },
+    "company_task_id": {
+      "type": "string",
+      "pattern": "^company:[a-z0-9-]+:[a-z0-9-]+$"
+    },
+    "parent_task_id": {
+      "type": "string",
+      "pattern": "^task:[a-z0-9-]+:[a-z0-9-]+$"
+    },
+    "request_id": {
+      "type": "string"
+    },
+    "line_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["inbox", "assigned", "in_progress", "meeting", "review", "done", "blocked", "failed"]
+    },
+    "requested_by": {
+      "type": "string"
+    },
+    "assigned_by": {
+      "type": "string"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": ["route", "research", "design", "build", "review", "ops", "meeting"]
+    },
+    "allowed_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["dispatch", "produce_artifact", "review_artifact", "request_meeting", "close_task", "escalate"]
+      },
+      "uniqueItems": true
+    },
+    "artifact_root": {
+      "type": "string"
+    },
+    "artifact_paths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "session_mode": {
+      "type": "string",
+      "const": "company"
+    },
+    "activation_reason": {
+      "type": "string"
+    },
+    "activation_scope": {
+      "type": "string",
+      "enum": ["request", "sticky_task"]
+    },
+    "notes": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/worker-result.schema.json",
+  "title": "Worker Result",
+  "type": "object",
+  "required": [
+    "task_id",
+    "line_id",
+    "role_id",
+    "status",
+    "summary",
+    "next_step",
+    "artifact_paths"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "line_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "role_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["partial", "complete", "blocked", "needs_review", "needs_meeting"]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "next_step": {
+      "type": "string"
+    },
+    "artifact_paths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "risks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    }
+  },
+  "additionalProperties": false
+}

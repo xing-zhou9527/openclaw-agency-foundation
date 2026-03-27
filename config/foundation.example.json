@@ -1,0 +1,51 @@
+{
+  "foundation_version": "0.2.0",
+  "session_modes": {
+    "default_mode": "assistant",
+    "front_gate_skill": "request-mode-gate",
+    "shared_decision_contract": "./contracts/session-mode-decision.schema.json",
+    "company_mode": {
+      "activation_policy": "request_scoped_fail_closed",
+      "allow_sticky_task_resume": true,
+      "require_company_operation_kind": true,
+      "require_business_execution": true,
+      "require_line_ownership": true,
+      "deny_for_general_chat": true,
+      "deny_for_meta_foundation": true,
+      "deny_for_private_help_without_line_owner": true
+    }
+  },
+  "company": {
+    "control_tower": {
+      "runtime_owner": "main_session",
+      "spawn_as_agent": false,
+      "execution_policy": "non-executing",
+      "allowed_actions": [
+        "dispatch",
+        "request_meeting",
+        "close_task",
+        "escalate"
+      ]
+    }
+  },
+  "lines": {
+    "instantiation_mode": "template_only",
+    "cross_line_policy": "deny",
+    "workspace_pattern": "./lines/{line_id}/workspace",
+    "artifact_pattern": "./lines/{line_id}/artifacts",
+    "meeting_pattern": "./lines/{line_id}/meetings",
+    "task_pattern": "./lines/{line_id}/tasks"
+  },
+  "role_source": {
+    "upstream": "agency-agents",
+    "adapter_template": "./prompts/agency-role-adapter.template.md",
+    "preserve_upstream_identity": true,
+    "add_openclaw_constraints": true
+  },
+  "meetings": {
+    "enabled": true,
+    "same_line_only": true,
+    "default_round_limit": 3,
+    "minutes_format": "markdown"
+  }
+}
