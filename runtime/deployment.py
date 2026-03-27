@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Mapping
 
 from .guardrails import FoundationRuleError
+from .manifest_validation import validate_deployment_manifest_payload
 
 
 GENCY_HOME_ENV = "GENCY_HOME"
@@ -65,9 +66,8 @@ def load_deployment_manifest(
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise FoundationRuleError(f"invalid deployment manifest json: {path}") from exc
-    if not isinstance(payload, dict):
-        raise FoundationRuleError(f"deployment manifest must be an object: {path}")
-    return DeploymentManifest(path=path, payload=payload)
+    normalized = validate_deployment_manifest_payload(payload)
+    return DeploymentManifest(path=path, payload=normalized)
 
 
 def resolve_deployment_layout(

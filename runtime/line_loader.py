@@ -2,10 +2,18 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterable, Mapping
+from typing import Iterable
 
 from .guardrails import FoundationRuleError
-from .models import BusinessLine
+from .manifest_validation import validate_business_line_manifest_payload
+from .models import (
+    BusinessLine,
+    MeetingPolicy,
+    ReviewPolicy,
+    SessionPolicy,
+    SpecialistRoleSpec,
+    TaskClassSpec,
+)
 from .router import build_line_roots, line_namespace
 
 
@@ -26,64 +34,45 @@ def load_manifest_payload(path: Path) -> dict:
     return payload
 
 
-def business_line_from_manifest_payload(payload: Mapping[str, object], *, lines_root: Path) -> BusinessLine:
-    required = {
-        "line_id",
-        "objective",
-        "orchestrator_role_id",
-        "meeting_moderator_role_id",
-        "specialists",
-        "task_classes",
-        "review_policy",
-        "meetings",
-        "sessions",
-    }
-    missing = [key for key in required if key not in payload]
-    if missing:
-        raise FoundationRuleError(
-            f"business-line manifest missing required fields: {', '.join(sorted(missing))}"
-        )
-
-    line_id = str(payload["line_id"])
-    if not line_id.strip():
-        raise FoundationRuleError("business-line manifest line_id cannot be empty")
-
-    orchestrator_role_id = str(payload["orchestrator_role_id"]).strip()
-    meeting_moderator_role_id = str(payload["meeting_moderator_role_id"]).strip()
-    if not orchestrator_role_id:
-        raise FoundationRuleError(
-            f"business-line manifest orchestrator_role_id cannot be empty: {line_id}"
-        )
-    if not meeting_moderator_role_id:
-        raise FoundationRuleError(
-            f"business-line manifest meeting_moderator_role_id cannot be empty: {line_id}"
-        )
-
-    specialists_raw = payload.get("specialists")
-    if not isinstance(specialists_raw, list) or not specialists_raw:
-        raise FoundationRuleError(
-            f"business-line manifest specialists must be a non-empty list: {line_id}"
-        )
-
-    specialist_role_ids: list[str] = []
-    for item in specialists_raw:
-        if not isinstance(item, dict):
-            raise FoundationRuleError(
-                f"business-line manifest specialist entry must be an object: {line_id}"
-            )
-        role_id = str(item.get("role_id", "")).strip()
-        if not role_id:
-            raise FoundationRuleError(
-                f"business-line manifest specialist is missing role_id: {line_id}"
-            )
-        specialist_role_ids.append(role_id)
-
-    if len(set(specialist_role_ids)) != len(specialist_role_ids):
-        raise FoundationRuleError(
-            f"business-line manifest specialist role_ids must be unique: {line_id}"
-        )
-
+def business_line_from_manifest_payload(payload: object, *, lines_root: Path) -> BusinessLine:
+    normalized = validate_business_line_manifest_payload(payload)
+    line_id = normalized["line_id"]
     roots = build_line_roots(Path(lines_root), line_id)
+
+    specialists = {
+        item["role_id"]: SpecialistRoleSpec(
+            role_id=item["role_id"],
+            upstream_role=item["upstream_role"],
+            purpose=item["purpose"],
+            allowed_actions=list(item["allowed_actions"]),
+            primary_artifact_types=list(item["primary_artifact_types"]),
+        )
+        for item in normalized["specialists"]
+    }
+    task_classes = {
+        item["task_type"]: TaskClassSpec(
+            task_type=item["task_type"],
+            default_owner_role_id=item["default_owner_role_id"],
+            allowed_actions=list(item["allowed_actions"]),
+            requires_review=bool(item["requires_review"]),
+        )
+        for item in normalized["task_classes"]
+    }
+    review_policy = ReviewPolicy(
+        required=bool(normalized["review_policy"]["required"]),
+        reviewer_role_ids=list(normalized["review_policy"]["reviewer_role_ids"]),
+        close_requires_review=bool(normalized["review_policy"]["close_requires_review"]),
+    )
+    meeting_policy = MeetingPolicy(
+        enabled=bool(normalized["meetings"]["enabled"]),
+        same_line_only=bool(normalized["meetings"]["same_line_only"]),
+        default_round_limit=int(normalized["meetings"]["default_round_limit"]),
+    )
+    session_policy = SessionPolicy(
+        spawn_strategy=str(normalized["sessions"]["spawn_strategy"]),
+        register_spawned_sessions=bool(normalized["sessions"]["register_spawned_sessions"]),
+    )
+
     return BusinessLine(
         line_id=line_id,
         namespace=line_namespace(line_id),
@@ -91,9 +80,16 @@ def business_line_from_manifest_payload(payload: Mapping[str, object], *, lines_
         artifact_root=roots["artifact_root"],
         meeting_root=roots["meeting_root"],
         task_root=roots["task_root"],
-        orchestrator_role_id=orchestrator_role_id,
-        meeting_moderator_role_id=meeting_moderator_role_id,
-        allowed_role_ids=specialist_role_ids,
+        orchestrator_role_id=normalized["orchestrator_role_id"],
+        meeting_moderator_role_id=normalized["meeting_moderator_role_id"],
+        allowed_role_ids=list(specialists.keys()),
+        objective=normalized["objective"],
+        scope_notes=list(normalized["scope_notes"]),
+        specialists=specialists,
+        task_classes=task_classes,
+        review_policy=review_policy,
+        meeting_policy=meeting_policy,
+        session_policy=session_policy,
     )
 
 

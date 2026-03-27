@@ -11,8 +11,13 @@ from .dispatch import ControlTowerDispatcher, command_to_payload
 from .guardrails import (
     FoundationRuleError,
     ensure_child_task_inherits_company_context,
+    ensure_close_allowed_by_review_policy,
     ensure_company_task_context,
+    ensure_meetings_enabled,
+    ensure_session_registration_allowed,
     ensure_task_assignment_is_legal,
+    ensure_task_matches_declared_class,
+    task_requires_review,
 )
 from .line_loader import (
     load_business_line_from_manifest_path,
@@ -177,7 +182,14 @@ class FoundationEngine:
             registry_root=registry_root,
             defaults=payload,
         )
-        enabled_lines = list(line_ids) if line_ids is not None else list(payload.get("enabled_lines", []))
+        manifest_enabled_lines = list(payload.get("enabled_lines", []))
+        enabled_lines = list(line_ids) if line_ids is not None else manifest_enabled_lines
+        if line_ids is not None:
+            unknown_line_ids = sorted(set(enabled_lines) - set(manifest_enabled_lines))
+            if unknown_line_ids:
+                raise FoundationRuleError(
+                    f"requested line_ids are not enabled in deployment manifest: {', '.join(unknown_line_ids)}"
+                )
         if not enabled_lines:
             raise FoundationRuleError(
                 f"deployment manifest must define enabled_lines: {deployment_manifest.path}"
@@ -396,6 +408,12 @@ class FoundationEngine:
         assigner = assigned_by or line.orchestrator_role_id
         if assigned_to not in line.allowed_role_ids:
             raise FoundationRuleError(f"specialist role not allowed in line: {assigned_to}")
+        ensure_task_matches_declared_class(
+            line=line,
+            task_type=task_type,
+            assigned_to=assigned_to,
+            allowed_actions=allowed_actions,
+        )
         task = TaskRecord(
             task_id=task_id(line_id, task_local_id),
             company_task_id=parent.company_task_id,
@@ -442,6 +460,8 @@ class FoundationEngine:
         session_key: str,
         role_id: str,
     ) -> TaskRecord:
+        line = self.require_line(line_id)
+        ensure_session_registration_allowed(line)
         board = self.board(line_id)
         task = board.load_task(task_id_value)
         if role_id != task.assigned_to:
@@ -474,6 +494,7 @@ class FoundationEngine:
     ) -> MeetingDispatch:
         ensure_company_mode_active(mode, expected_line_id=line_id)
         line = self.require_line(line_id)
+        ensure_meetings_enabled(line)
         board = self.board(line_id)
         meeting_board = self.meeting_board(line_id)
         task = board.load_task(task_id_value)
@@ -525,6 +546,7 @@ class FoundationEngine:
         requested_by: str | None = None,
     ) -> MeetingDispatch:
         line = self.require_line(line_id)
+        ensure_meetings_enabled(line)
         board = self.board(line_id)
         meeting_board = self.meeting_board(line_id)
         task = board.load_task(task_id_value)
@@ -638,8 +660,11 @@ class FoundationEngine:
         fail: bool = False,
     ) -> TaskRecord:
         ensure_company_mode_active(mode, expected_line_id=line_id)
+        line = self.require_line(line_id)
         board = self.board(line_id)
         task = board.load_task(task_id_value)
+        if not fail:
+            ensure_close_allowed_by_review_policy(line, task)
         cmd = self.dispatcher.close_task(
             request_id=request_id,
             line_id=line_id,
@@ -734,7 +759,7 @@ class FoundationEngine:
             current = board.transition(current.task_id, TaskState.IN_PROGRESS, note="worker completion implies work started")
 
         current = board.update_artifacts(current.task_id, result.artifact_paths, note="artifacts accepted from worker")
-        next_state = self._next_state_from_worker_result(current, result)
+        next_state = self._next_state_from_worker_result(line, current, result)
         if next_state != current.state:
             current = board.transition(current.task_id, next_state, note=result.summary)
         self.registry.sync_task(current)
@@ -777,7 +802,7 @@ class FoundationEngine:
         return report, current
 
     @staticmethod
-    def _next_state_from_worker_result(task: TaskRecord, result) -> TaskState:
+    def _next_state_from_worker_result(line: BusinessLine, task: TaskRecord, result) -> TaskState:
         if result.status == "blocked":
             return TaskState.BLOCKED
         if result.status == "needs_meeting":
@@ -785,7 +810,7 @@ class FoundationEngine:
         if result.status == "needs_review":
             return TaskState.REVIEW
         if result.status == "complete":
-            if "review_artifact" in task.allowed_actions:
+            if task_requires_review(line, task):
                 return TaskState.REVIEW
             return TaskState.DONE
         return TaskState.IN_PROGRESS

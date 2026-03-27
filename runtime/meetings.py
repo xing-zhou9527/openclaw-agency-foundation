@@ -19,9 +19,10 @@ def open_meeting(
     topic: str,
     participant_role_ids: Iterable[str],
     agenda: List[str],
-    round_limit: int = 3,
+    round_limit: int | None = None,
 ) -> MeetingRecord:
     participants = list(dict.fromkeys(participant_role_ids))
+    round_limit = line.meeting_policy.default_round_limit if round_limit is None else round_limit
     if len(participants) < 2:
         raise FoundationRuleError("meeting requires at least 2 unique participants")
     if not topic.strip():

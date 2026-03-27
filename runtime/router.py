@@ -4,7 +4,13 @@ from pathlib import Path
 from typing import Dict
 
 from .guardrails import FoundationRuleError, ensure_control_tower_is_non_executing
-from .models import ActorKind, BusinessLine
+from .models import (
+    ActorKind,
+    BusinessLine,
+    MeetingPolicy,
+    ReviewPolicy,
+    SessionPolicy,
+)
 
 
 def company_task_id(line_id: str, local_id: str) -> str:
@@ -59,6 +65,9 @@ def build_line_template(lines_root: Path, line_id: str) -> BusinessLine:
         orchestrator_role_id=f"{line_id}-orchestrator",
         meeting_moderator_role_id=f"{line_id}-meeting-moderator",
         allowed_role_ids=[],
+        review_policy=ReviewPolicy(),
+        meeting_policy=MeetingPolicy(),
+        session_policy=SessionPolicy(),
     )
 
 

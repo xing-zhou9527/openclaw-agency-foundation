@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 
 class ActorKind(str, Enum):
@@ -25,6 +25,43 @@ class TaskState(str, Enum):
 
 
 @dataclass(frozen=True)
+class SpecialistRoleSpec:
+    role_id: str
+    upstream_role: str
+    purpose: str
+    allowed_actions: List[str] = field(default_factory=list)
+    primary_artifact_types: List[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class TaskClassSpec:
+    task_type: str
+    default_owner_role_id: str
+    allowed_actions: List[str] = field(default_factory=list)
+    requires_review: bool = False
+
+
+@dataclass(frozen=True)
+class ReviewPolicy:
+    required: bool = False
+    reviewer_role_ids: List[str] = field(default_factory=list)
+    close_requires_review: bool = False
+
+
+@dataclass(frozen=True)
+class MeetingPolicy:
+    enabled: bool = True
+    same_line_only: bool = True
+    default_round_limit: int = 3
+
+
+@dataclass(frozen=True)
+class SessionPolicy:
+    spawn_strategy: str = "on_demand"
+    register_spawned_sessions: bool = True
+
+
+@dataclass(frozen=True)
 class BusinessLine:
     line_id: str
     namespace: str
@@ -35,6 +72,14 @@ class BusinessLine:
     orchestrator_role_id: str
     meeting_moderator_role_id: str
     allowed_role_ids: List[str] = field(default_factory=list)
+    objective: str = ""
+    scope_notes: List[str] = field(default_factory=list)
+    specialists: Dict[str, SpecialistRoleSpec] = field(default_factory=dict)
+    task_classes: Dict[str, TaskClassSpec] = field(default_factory=dict)
+    review_policy: ReviewPolicy = field(default_factory=ReviewPolicy)
+    meeting_policy: MeetingPolicy = field(default_factory=MeetingPolicy)
+    session_policy: SessionPolicy = field(default_factory=SessionPolicy)
+    cross_line_policy: str = "deny"
 
 
 @dataclass(frozen=True)

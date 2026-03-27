@@ -99,7 +99,7 @@ def main() -> None:
         task_local_id="002",
         assigned_to="marketing-writer",
         task_type="build",
-        allowed_actions=["produce_artifact", "review_artifact", "request_meeting"],
+        allowed_actions=["produce_artifact", "request_meeting", "escalate"],
         reason="assign content draft",
     )
     engine.register_spawned_session(
