@@ -2,11 +2,36 @@
 
 This guide turns the foundation into its first real business line without skipping the safety model.
 
+Important boundary: the first real line should be created as an external deployment asset, not as committed runtime content inside this repo.
+By default, put it under `~/.gency` unless you override the deployment roots with environment variables.
+
 Use it together with:
 
 - `../LINE_CREATION_CHECKLIST.md`
 - `../config/business-line.example.json`
 - `../templates/business-line.template.md`
+
+## Default external layout
+
+A reasonable default is:
+
+```text
+~/.gency/
+├── line-packs/
+├── prompt-packs/
+└── state/
+    ├── registry/
+    └── lines/
+```
+
+Suggested env overrides when needed:
+
+- `GENCY_HOME`
+- `GENCY_MANIFEST_ROOT`
+- `GENCY_PROMPT_ROOT`
+- `GENCY_STATE_ROOT`
+- `GENCY_LINES_ROOT`
+- `GENCY_REGISTRY_ROOT`
 
 ## Goal
 
@@ -151,7 +176,7 @@ If your session strategy makes that ambiguous, tighten it before proceeding.
 
 ## Step 9. Mirror the template into a machine-readable manifest
 
-Once the human-readable template is clear, create the machine-readable line manifest based on:
+Once the human-readable template is clear, create the machine-readable line manifest as external deployment content based on:
 
 - `../contracts/business-line-manifest.schema.json`
 - `../config/business-line.example.json`
@@ -160,6 +185,12 @@ The human template and JSON manifest should say the same thing from two angles:
 
 - one for humans reviewing intent
 - one for runtime and tooling validation
+
+Recommended default location:
+
+```text
+~/.gency/line-packs/<line_id>/manifest.json
+```
 
 ## Step 10. Rehearse the happy path
 

@@ -23,8 +23,14 @@ def line_namespace(line_id: str) -> str:
     return f"line:{line_id}"
 
 
-def build_line_roots(base_dir: Path, line_id: str) -> Dict[str, Path]:
-    line_root = base_dir / "lines" / line_id
+def build_line_roots(lines_root: Path, line_id: str) -> Dict[str, Path]:
+    """Build line-local state roots under an external lines root.
+
+    `lines_root` should normally resolve from the deployment/workdir layout
+    (default `~/.gency/state/lines`) instead of the foundation code repo.
+    """
+
+    line_root = Path(lines_root) / line_id
     return {
         "line_root": line_root,
         "workspace_root": line_root / "workspace",
@@ -34,8 +40,15 @@ def build_line_roots(base_dir: Path, line_id: str) -> Dict[str, Path]:
     }
 
 
-def build_line_template(base_dir: Path, line_id: str) -> BusinessLine:
-    roots = build_line_roots(base_dir, line_id)
+def build_line_template(lines_root: Path, line_id: str) -> BusinessLine:
+    """Synthesize a line template from a lines root.
+
+    This remains useful for smoke tests and transitional bootstrap flows, but it
+    should be treated as a helper. Real line and role definitions are expected to
+    come from external deployment assets, not from the foundation repo itself.
+    """
+
+    roots = build_line_roots(lines_root, line_id)
     return BusinessLine(
         line_id=line_id,
         namespace=line_namespace(line_id),

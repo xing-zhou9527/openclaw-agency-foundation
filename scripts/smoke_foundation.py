@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import shutil
 import sys
 import tempfile
@@ -20,6 +21,14 @@ def load_runtime_package(source_root: Path):
 def main() -> None:
     repo = Path(__file__).resolve().parents[1]
     temp_root = load_runtime_package(repo)
+    gency_home = temp_root / ".gency"
+    manifest_dir = gency_home / "line-packs" / "marketing"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    example_manifest = json.loads((repo / "config" / "business-line.example.json").read_text(encoding="utf-8"))
+    (manifest_dir / "manifest.json").write_text(
+        json.dumps(example_manifest, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 
     from openclaw_agency_foundation.runtime.engine import FoundationEngine
     from openclaw_agency_foundation.runtime.hooks import SubagentCompletionEvent, SubagentCompletionHook
@@ -33,16 +42,10 @@ def main() -> None:
     )
     from openclaw_agency_foundation.runtime.guardrails import FoundationRuleError
 
-    engine = FoundationEngine.from_line_ids(base_dir=temp_root / "runtime-state", line_ids=["marketing"])
-    engine.lines["marketing"] = engine.lines["marketing"].__class__(
-        **{
-            **engine.lines["marketing"].__dict__,
-            "allowed_role_ids": ["marketing-writer", "marketing-reviewer"],
-        }
+    engine = FoundationEngine.from_manifest_dir(
+        line_ids=["marketing"],
+        home=gency_home,
     )
-    engine.taskboards["marketing"] = engine.taskboards["marketing"].__class__(engine.lines["marketing"].task_root)
-    engine.meetingboards["marketing"] = engine.meetingboards["marketing"].__class__(engine.lines["marketing"].meeting_root)
-    engine.dispatcher = engine.dispatcher.__class__(engine.lines)
 
     assistant_mode = decide_session_mode(
         ModeIntent(

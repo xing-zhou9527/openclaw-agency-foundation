@@ -96,6 +96,22 @@ They are structured coordination rounds with:
 - decision output
 - minutes
 
+### G. Foundation repo, deployment assets, and runtime state must be separate
+The foundation repo is the product codebase.
+It should not be considered incomplete just because no concrete business line has been instantiated inside it.
+
+Three layers should stay distinct:
+- **foundation code** — schemas, runtime, validators, adapters, templates, docs
+- **deployment assets** — business-line manifests, role packs, prompt packs
+- **runtime state** — tasks, meetings, artifacts, registry, spawned-session bindings
+
+Default external workdir:
+- `~/.gency`
+
+Default override model:
+- `GENCY_HOME`
+- optional granular overrides such as `GENCY_MANIFEST_ROOT`, `GENCY_PROMPT_ROOT`, `GENCY_STATE_ROOT`, `GENCY_LINES_ROOT`, `GENCY_REGISTRY_ROOT`
+
 ## 3. Runtime topology
 
 ### Layer 0 — Foundation kernel
@@ -108,6 +124,17 @@ Contains:
 - prompt templates
 - authoritative registry / continuation logic
 - future generators
+
+### Layer 0.5 — External deployment/workdir
+Lives outside the repo, defaulting to `~/.gency` unless overridden by environment variables.
+Contains:
+- business-line manifests
+- generated role packs
+- generated prompt packs
+- runtime state roots
+
+This is where concrete line instances belong.
+It is not a sign that the foundation repo is incomplete if these assets do not exist yet.
 
 ### Layer 1 — Main-session assistant plane
 This is the default behavior of the primary session.

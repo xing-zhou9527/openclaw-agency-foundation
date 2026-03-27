@@ -6,6 +6,7 @@ This guide gets you from “I just opened the repo” to “I understand the fou
 
 This project is a foundation for building line-isolated multi-agent operating systems on top of OpenClaw.
 It is **not** a ready-made business deployment.
+It is also **not** supposed to contain your deployed business lines or runtime state inside the repo itself.
 
 The two most important ideas to keep in mind are:
 
@@ -48,6 +49,8 @@ If you are changing behavior that matters, you will almost always touch both a c
 
 The most important runtime entry points are:
 
+- `../runtime/deployment.py`
+- `../runtime/line_loader.py`
 - `../runtime/mode_gate.py`
 - `../runtime/engine.py`
 - `../runtime/guardrails.py`
@@ -59,6 +62,8 @@ The most important runtime entry points are:
 
 A practical mental model:
 
+- `deployment.py` resolves the external workdir layout, defaulting to `~/.gency`
+- `line_loader.py` turns external line-pack manifests into runtime `BusinessLine` definitions
 - `mode_gate.py` decides whether company mode is even legal
 - `engine.py` is the orchestration entry point
 - `guardrails.py` rejects invalid behavior
@@ -106,6 +111,14 @@ Jump next to:
 - `../templates/business-line.template.md`
 - `../LINE_CREATION_CHECKLIST.md`
 - `./first-business-line.md`
+
+But treat those repo files as generators/templates only. The actual line pack and runtime state should live in the external workdir, normally `~/.gency` unless overridden by environment variables.
+
+The intended runtime entrypoint for a real deployment is `FoundationEngine.from_manifest_dir(...)`, which loads manifests from a layout like:
+
+```text
+~/.gency/line-packs/<line_id>/manifest.json
+```
 
 ## 8. Safe development loop
 

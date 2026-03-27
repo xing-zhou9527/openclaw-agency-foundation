@@ -6,6 +6,7 @@ from typing import Iterable, Mapping, Sequence
 
 from .audit import ComplianceReport, audit_post_run_payload, coerce_worker_result
 from .continuation import ContinuationRequest, ContinuationResolution, resolve_continuation
+from .deployment import resolve_deployment_layout
 from .dispatch import ControlTowerDispatcher, command_to_payload
 from .guardrails import (
     FoundationRuleError,
@@ -13,6 +14,7 @@ from .guardrails import (
     ensure_company_task_context,
     ensure_task_assignment_is_legal,
 )
+from .line_loader import load_business_lines_from_manifest_root
 from .meetingboard import LineMeetingBoard
 from .meetings import open_meeting
 from .mode_gate import ModeDecision, ensure_company_mode_active, mode_decision_to_payload
@@ -56,8 +58,15 @@ class FoundationEngine:
     worker-completion events can be tied back to the correct task lineage.
     """
 
-    def __init__(self, *, base_dir: Path, lines: Mapping[str, BusinessLine]):
-        self.base_dir = Path(base_dir)
+    def __init__(
+        self,
+        *,
+        state_root: Path,
+        lines: Mapping[str, BusinessLine],
+        registry_root: Path | None = None,
+    ):
+        self.state_root = Path(state_root)
+        self.registry_root = Path(registry_root or (self.state_root / "registry"))
         self.lines = dict(lines)
         self.dispatcher = ControlTowerDispatcher(self.lines)
         self.taskboards = {
@@ -66,14 +75,99 @@ class FoundationEngine:
         self.meetingboards = {
             line_id: LineMeetingBoard(line.meeting_root) for line_id, line in self.lines.items()
         }
-        self.registry = CompanyTaskRegistry(self.base_dir / "registry")
+        self.registry = CompanyTaskRegistry(self.registry_root)
 
     @classmethod
-    def from_line_ids(cls, *, base_dir: Path, line_ids: Iterable[str]) -> "FoundationEngine":
+    def from_deployment(
+        cls,
+        *,
+        line_ids: Iterable[str],
+        home: Path | str | None = None,
+        manifest_root: Path | str | None = None,
+        state_root: Path | str | None = None,
+        lines_root: Path | str | None = None,
+        registry_root: Path | str | None = None,
+    ) -> "FoundationEngine":
+        layout = resolve_deployment_layout(
+            home=home,
+            manifest_root=manifest_root,
+            state_root=state_root,
+            lines_root=lines_root,
+            registry_root=registry_root,
+        )
         lines = {
-            line_id: build_line_template(Path(base_dir), line_id) for line_id in line_ids
+            line_id: build_line_template(layout.lines_root, line_id) for line_id in line_ids
         }
-        return cls(base_dir=Path(base_dir), lines=lines)
+        return cls(
+            state_root=layout.state_root,
+            registry_root=layout.registry_root,
+            lines=lines,
+        )
+
+    @classmethod
+    def from_manifest_dir(
+        cls,
+        *,
+        line_ids: Iterable[str] | None = None,
+        home: Path | str | None = None,
+        manifest_root: Path | str | None = None,
+        state_root: Path | str | None = None,
+        lines_root: Path | str | None = None,
+        registry_root: Path | str | None = None,
+    ) -> "FoundationEngine":
+        """Load business lines from external manifest assets.
+
+        This is the intended initialization path for real deployments:
+        - line definitions come from external line packs under `~/.gency/line-packs`
+        - runtime state lives under `~/.gency/state`
+        - the foundation repo remains product code only
+        """
+
+        layout = resolve_deployment_layout(
+            home=home,
+            manifest_root=manifest_root,
+            state_root=state_root,
+            lines_root=lines_root,
+            registry_root=registry_root,
+        )
+        lines = load_business_lines_from_manifest_root(
+            layout.manifest_root,
+            lines_root=layout.lines_root,
+            line_ids=line_ids,
+        )
+        return cls(
+            state_root=layout.state_root,
+            registry_root=layout.registry_root,
+            lines=lines,
+        )
+
+    @classmethod
+    def from_line_ids(
+        cls,
+        *,
+        line_ids: Iterable[str],
+        base_dir: Path | str | None = None,
+        state_root: Path | str | None = None,
+        lines_root: Path | str | None = None,
+        registry_root: Path | str | None = None,
+        home: Path | str | None = None,
+    ) -> "FoundationEngine":
+        """Compatibility helper for smoke/demo flows.
+
+        This helper still synthesizes line templates from a lines root, but real
+        deployments should treat line/role assets as external workdir content under
+        `~/.gency` (or env-overridden roots), not as foundation-repo state.
+        """
+
+        if state_root is None and base_dir is not None:
+            state_root = base_dir
+        return cls.from_deployment(
+            line_ids=line_ids,
+            home=home,
+            state_root=state_root,
+            lines_root=lines_root,
+            registry_root=registry_root,
+        )
 
     def require_line(self, line_id: str) -> BusinessLine:
         line = self.lines.get(line_id)

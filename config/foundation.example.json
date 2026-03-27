@@ -1,5 +1,5 @@
 {
-  "foundation_version": "0.2.0",
+  "foundation_version": "0.3.0",
   "session_modes": {
     "default_mode": "assistant",
     "front_gate_skill": "request-mode-gate",
@@ -28,13 +28,28 @@
       ]
     }
   },
+  "deployment": {
+    "default_home": "~/.gency",
+    "home_env": "GENCY_HOME",
+    "optional_env_overrides": {
+      "manifest_root": "GENCY_MANIFEST_ROOT",
+      "prompt_root": "GENCY_PROMPT_ROOT",
+      "state_root": "GENCY_STATE_ROOT",
+      "lines_root": "GENCY_LINES_ROOT",
+      "registry_root": "GENCY_REGISTRY_ROOT"
+    },
+    "defaults": {
+      "manifest_root": "~/.gency/line-packs",
+      "prompt_root": "~/.gency/prompt-packs",
+      "state_root": "~/.gency/state",
+      "lines_root": "~/.gency/state/lines",
+      "registry_root": "~/.gency/state/registry"
+    }
+  },
   "lines": {
-    "instantiation_mode": "template_only",
-    "cross_line_policy": "deny",
-    "workspace_pattern": "./lines/{line_id}/workspace",
-    "artifact_pattern": "./lines/{line_id}/artifacts",
-    "meeting_pattern": "./lines/{line_id}/meetings",
-    "task_pattern": "./lines/{line_id}/tasks"
+    "instantiation_mode": "external_workdir",
+    "definition_source": "external_line_packs",
+    "cross_line_policy": "deny"
   },
   "role_source": {
     "upstream": "agency-agents",

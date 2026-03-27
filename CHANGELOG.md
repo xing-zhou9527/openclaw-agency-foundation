@@ -9,9 +9,15 @@ The format loosely follows Keep a Changelog, and versioning can evolve as the fo
 ### Added
 - GitHub-style repository housekeeping files: `CONTRIBUTING.md`, `LICENSE`, `docs/quickstart.md`, and `docs/first-business-line.md`
 - A clearer onboarding path for new contributors and first-line instantiation work
+- `runtime/deployment.py` for resolving the external deployment/workdir layout
+- `runtime/line_loader.py` for loading business-line definitions from external line-pack manifests
 
 ### Changed
 - `README.md` was rewritten into a more complete open-source project homepage with architecture, scope, workflow, and next-step guidance
+- the default deployment boundary now treats `~/.gency` as the external home for line packs, prompt packs, and runtime state, with environment-variable overrides
+- `FoundationEngine` now supports manifest-based external deployment initialization instead of assuming repo-local line state
+- synthesized line templates are explicitly treated as smoke/demo helpers rather than the intended production boundary
+- `scripts/smoke_foundation.py` now exercises manifest-based loading from an external workdir layout
 
 ## [0.2.0] - 2026-03-26
 

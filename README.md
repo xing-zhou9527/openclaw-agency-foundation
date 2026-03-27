@@ -56,11 +56,11 @@ That distinction is explicit in the registry model.
 - **Structured same-line meetings** with persisted minutes and outcome merge
 - **Strict spawned-session binding** for completion events
 - **Smoke tests** for the main happy path and key rejection paths
-- **Templates and example configs** for instantiating the first business line
+- **Templates and example configs** for generating external business-line assets
 
 ## Current status
 
-This repository is currently at the **foundation-ready / instantiation-next** stage.
+This repository should be treated as a **complete foundation repo**, not as an incomplete company deployment.
 
 What is already solid:
 
@@ -71,13 +71,20 @@ What is already solid:
 - authoritative continuation semantics via `resume_task_id` and `last_updated_task_id`
 - same-line meeting lifecycle with persisted minutes
 - completion-source validation using registered `source_session_key` + `source_role_id`
+- explicit separation between foundation code and external deployment/workdir roots
 
-What is still intentionally not included:
+What is intentionally outside this repo by design:
 
-- real business-line manifests wired into production execution
-- generated role packs from `agency-agents`
+- business-line instances
+- role packs generated for a specific deployment
+- prompt packs generated for a specific deployment
+- runtime task / meeting / artifact / registry state
+
+What still needs one more implementation pass:
+
 - real OpenClaw completion-event plumbing beyond the current foundation workflow model
-- a production deployment story for a live organization
+- manifest-to-runtime loading instead of smoke/demo-style synthesized line templates
+- a polished production deployment story for a live organization
 
 ## Repository layout
 
@@ -111,6 +118,8 @@ openclaw-agency-foundation/
 │   ├── meeting-moderator.system.md
 │   └── agency-role-adapter.template.md
 ├── runtime/
+│   ├── deployment.py
+│   ├── line_loader.py
 │   ├── engine.py
 │   ├── mode_gate.py
 │   ├── dispatch.py
@@ -179,6 +188,50 @@ They are structured workflows with:
 - next actions
 - unresolved risks
 
+## Deployment boundary
+
+The foundation repo is product code.
+It should not be the default home for business-line instances or runtime state.
+
+Default external workdir:
+
+```text
+~/.gency/
+├── line-packs/
+├── prompt-packs/
+└── state/
+    ├── registry/
+    └── lines/
+        └── <line_id>/
+            ├── workspace/
+            ├── artifacts/
+            ├── meetings/
+            └── tasks/
+```
+
+Default environment variable behavior:
+
+- `GENCY_HOME` → defaults to `~/.gency`
+- `GENCY_MANIFEST_ROOT` → overrides `~/.gency/line-packs`
+- `GENCY_PROMPT_ROOT` → overrides `~/.gency/prompt-packs`
+- `GENCY_STATE_ROOT` → overrides `~/.gency/state`
+- `GENCY_LINES_ROOT` → overrides `~/.gency/state/lines`
+- `GENCY_REGISTRY_ROOT` → overrides `~/.gency/state/registry`
+
+This means the foundation repo can be complete on its own, while line packs and runtime state remain external deployment assets.
+
+Intended runtime initialization path:
+
+- `FoundationEngine.from_manifest_dir(...)` loads business lines from external manifests
+- `FoundationEngine.from_deployment(...)` remains useful for synthesized/demo bootstraps
+- `FoundationEngine.from_line_ids(...)` is kept only as a compatibility helper for smoke/demo-style flows
+
+Expected manifest location pattern:
+
+```text
+~/.gency/line-packs/<line_id>/manifest.json
+```
+
 ## Quick start
 
 ### 1. Read the design docs
@@ -210,8 +263,8 @@ Expected output:
 smoke_foundation_ok
 ```
 
-### 4. Draft your first business line
-Use:
+### 4. Prepare your first external business-line pack
+Use these repo assets to generate deployment content outside the repo, normally under `~/.gency`:
 
 - `config/business-line.example.json`
 - `templates/business-line.template.md`

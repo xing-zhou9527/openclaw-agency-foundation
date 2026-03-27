@@ -19,6 +19,7 @@ env/
 
 # Local runtime / generated state
 runtime-state/
+.gency/
 *.log
 
 # Editors
