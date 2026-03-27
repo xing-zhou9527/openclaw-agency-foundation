@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw-agency-foundation/contracts/deployment-manifest.schema.json",
+  "title": "Foundation Deployment Manifest",
+  "type": "object",
+  "required": [
+    "deployment_name",
+    "enabled_lines"
+  ],
+  "properties": {
+    "deployment_name": {
+      "type": "string"
+    },
+    "home": {
+      "type": "string"
+    },
+    "manifest_root": {
+      "type": "string"
+    },
+    "prompt_root": {
+      "type": "string"
+    },
+    "state_root": {
+      "type": "string"
+    },
+    "lines_root": {
+      "type": "string"
+    },
+    "registry_root": {
+      "type": "string"
+    },
+    "enabled_lines": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      }
+    },
+    "line_manifest_files": {
+      "type": "object",
+      "description": "Optional explicit manifest path overrides by line_id. Relative paths resolve from the deployment manifest directory.",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "additionalProperties": false
+}

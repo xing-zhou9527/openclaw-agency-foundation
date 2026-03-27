@@ -1,0 +1,19 @@
+{
+  "deployment_name": "local-dev",
+  "home": "~/.gency",
+  "manifest_root": "~/.gency/line-packs",
+  "prompt_root": "~/.gency/prompt-packs",
+  "state_root": "~/.gency/state",
+  "lines_root": "~/.gency/state/lines",
+  "registry_root": "~/.gency/state/registry",
+  "enabled_lines": [
+    "marketing"
+  ],
+  "line_manifest_files": {
+    "marketing": "line-packs/marketing/manifest.json"
+  },
+  "notes": [
+    "Environment variables may override any of the roots above.",
+    "Relative line_manifest_files paths resolve from the deployment manifest directory."
+  ]
+}

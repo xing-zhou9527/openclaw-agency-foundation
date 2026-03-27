@@ -6,7 +6,7 @@ from typing import Iterable, Mapping, Sequence
 
 from .audit import ComplianceReport, audit_post_run_payload, coerce_worker_result
 from .continuation import ContinuationRequest, ContinuationResolution, resolve_continuation
-from .deployment import resolve_deployment_layout
+from .deployment import load_deployment_manifest, resolve_deployment_layout
 from .dispatch import ControlTowerDispatcher, command_to_payload
 from .guardrails import (
     FoundationRuleError,
@@ -14,7 +14,10 @@ from .guardrails import (
     ensure_company_task_context,
     ensure_task_assignment_is_legal,
 )
-from .line_loader import load_business_lines_from_manifest_root
+from .line_loader import (
+    load_business_line_from_manifest_path,
+    load_business_lines_from_manifest_root,
+)
 from .meetingboard import LineMeetingBoard
 from .meetings import open_meeting
 from .mode_gate import ModeDecision, ensure_company_mode_active, mode_decision_to_payload
@@ -135,6 +138,76 @@ class FoundationEngine:
             lines_root=layout.lines_root,
             line_ids=line_ids,
         )
+        return cls(
+            state_root=layout.state_root,
+            registry_root=layout.registry_root,
+            lines=lines,
+        )
+
+    @classmethod
+    def from_deployment_manifest(
+        cls,
+        *,
+        manifest_path: Path | str | None = None,
+        home: Path | str | None = None,
+        manifest_root: Path | str | None = None,
+        state_root: Path | str | None = None,
+        lines_root: Path | str | None = None,
+        registry_root: Path | str | None = None,
+        line_ids: Iterable[str] | None = None,
+    ) -> "FoundationEngine":
+        """Load a deployment manifest and initialize the engine from it.
+
+        Intended first-class public boundary:
+        - deployment manifest (default `~/.gency/deployment.json`)
+        - line packs under `~/.gency/line-packs`
+        - runtime state under `~/.gency/state`
+        """
+
+        deployment_manifest = load_deployment_manifest(
+            manifest_path=manifest_path,
+            home=home,
+        )
+        payload = deployment_manifest.payload
+        layout = resolve_deployment_layout(
+            home=home,
+            manifest_root=manifest_root,
+            state_root=state_root,
+            lines_root=lines_root,
+            registry_root=registry_root,
+            defaults=payload,
+        )
+        enabled_lines = list(line_ids) if line_ids is not None else list(payload.get("enabled_lines", []))
+        if not enabled_lines:
+            raise FoundationRuleError(
+                f"deployment manifest must define enabled_lines: {deployment_manifest.path}"
+            )
+
+        manifest_files = payload.get("line_manifest_files", {})
+        if manifest_files and not isinstance(manifest_files, dict):
+            raise FoundationRuleError(
+                f"deployment manifest line_manifest_files must be an object: {deployment_manifest.path}"
+            )
+
+        lines: dict[str, BusinessLine] = {}
+        for line_id in enabled_lines:
+            explicit_manifest = manifest_files.get(line_id) if isinstance(manifest_files, dict) else None
+            if explicit_manifest:
+                explicit_manifest_path = Path(str(explicit_manifest)).expanduser()
+                if not explicit_manifest_path.is_absolute():
+                    explicit_manifest_path = deployment_manifest.path.parent / explicit_manifest_path
+                lines[line_id] = load_business_line_from_manifest_path(
+                    explicit_manifest_path,
+                    lines_root=layout.lines_root,
+                )
+            else:
+                lines.update(
+                    load_business_lines_from_manifest_root(
+                        layout.manifest_root,
+                        lines_root=layout.lines_root,
+                        line_ids=[line_id],
+                    )
+                )
         return cls(
             state_root=layout.state_root,
             registry_root=layout.registry_root,

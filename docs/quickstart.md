@@ -42,6 +42,8 @@ Start with:
 - `meeting.schema.json`
 - `company-task-entry.schema.json`
 - `continuation-resolution.schema.json`
+- `deployment-manifest.schema.json`
+- `../config/deployment.example.json`
 
 If you are changing behavior that matters, you will almost always touch both a contract and the code that enforces it.
 
@@ -62,7 +64,7 @@ The most important runtime entry points are:
 
 A practical mental model:
 
-- `deployment.py` resolves the external workdir layout, defaulting to `~/.gency`
+- `deployment.py` resolves the external workdir layout and deployment manifest path, defaulting to `~/.gency`
 - `line_loader.py` turns external line-pack manifests into runtime `BusinessLine` definitions
 - `mode_gate.py` decides whether company mode is even legal
 - `engine.py` is the orchestration entry point
@@ -114,9 +116,15 @@ Jump next to:
 
 But treat those repo files as generators/templates only. The actual line pack and runtime state should live in the external workdir, normally `~/.gency` unless overridden by environment variables.
 
-The intended runtime entrypoint for a real deployment is `FoundationEngine.from_manifest_dir(...)`, which loads manifests from a layout like:
+The intended runtime entrypoints for a real deployment are:
+
+- `FoundationEngine.from_deployment_manifest(...)`
+- `FoundationEngine.from_manifest_dir(...)`
+
+Typical external layout:
 
 ```text
+~/.gency/deployment.json
 ~/.gency/line-packs/<line_id>/manifest.json
 ```
 

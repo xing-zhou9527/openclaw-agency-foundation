@@ -83,7 +83,7 @@ What is intentionally outside this repo by design:
 What still needs one more implementation pass:
 
 - real OpenClaw completion-event plumbing beyond the current foundation workflow model
-- manifest-to-runtime loading instead of smoke/demo-style synthesized line templates
+- a more formal deployment-manifest surface if richer multi-line deployment control is needed
 - a polished production deployment story for a live organization
 
 ## Repository layout
@@ -99,6 +99,7 @@ openclaw-agency-foundation/
 ├── LINE_CREATION_CHECKLIST.md
 ├── config/
 │   ├── foundation.example.json
+│   ├── deployment.example.json
 │   └── business-line.example.json
 ├── contracts/
 │   ├── session-mode-decision.schema.json
@@ -107,11 +108,14 @@ openclaw-agency-foundation/
 │   ├── worker-result.schema.json
 │   ├── meeting.schema.json
 │   ├── business-line-manifest.schema.json
+│   ├── deployment-manifest.schema.json
 │   ├── company-task-entry.schema.json
 │   └── continuation-resolution.schema.json
 ├── docs/
 │   ├── quickstart.md
-│   └── first-business-line.md
+│   ├── first-business-line.md
+│   ├── repo-profile.md
+│   └── release-v0.3.0.md
 ├── prompts/
 │   ├── control-tower.system.md
 │   ├── line-orchestrator.system.md
@@ -212,6 +216,7 @@ Default external workdir:
 Default environment variable behavior:
 
 - `GENCY_HOME` → defaults to `~/.gency`
+- `GENCY_DEPLOYMENT_MANIFEST` → overrides `~/.gency/deployment.json`
 - `GENCY_MANIFEST_ROOT` → overrides `~/.gency/line-packs`
 - `GENCY_PROMPT_ROOT` → overrides `~/.gency/prompt-packs`
 - `GENCY_STATE_ROOT` → overrides `~/.gency/state`
@@ -222,13 +227,15 @@ This means the foundation repo can be complete on its own, while line packs and 
 
 Intended runtime initialization path:
 
-- `FoundationEngine.from_manifest_dir(...)` loads business lines from external manifests
+- `FoundationEngine.from_deployment_manifest(...)` loads a deployment manifest, then resolves enabled line packs and state roots
+- `FoundationEngine.from_manifest_dir(...)` loads business lines directly from external line-pack manifests
 - `FoundationEngine.from_deployment(...)` remains useful for synthesized/demo bootstraps
 - `FoundationEngine.from_line_ids(...)` is kept only as a compatibility helper for smoke/demo-style flows
 
-Expected manifest location pattern:
+Expected external asset locations:
 
 ```text
+~/.gency/deployment.json
 ~/.gency/line-packs/<line_id>/manifest.json
 ```
 
@@ -251,6 +258,7 @@ The contracts are the source of truth for safe orchestration behavior:
 - `contracts/meeting.schema.json`
 - `contracts/company-task-entry.schema.json`
 - `contracts/continuation-resolution.schema.json`
+- `contracts/deployment-manifest.schema.json`
 
 ### 3. Run the smoke test
 ```bash
@@ -335,8 +343,11 @@ If you extend this foundation, keep new capabilities aligned with the same rule:
 - `LINE_CREATION_CHECKLIST.md` — pre-instantiation checklist
 - `docs/quickstart.md` — fastest path to understanding the foundation
 - `docs/first-business-line.md` — step-by-step guide for instantiating the first real line
+- `docs/repo-profile.md` — suggested public repo description, topics, and framing
+- `docs/release-v0.3.0.md` — draft release notes for the current public boundary
 - `CONTRIBUTING.md` — contribution workflow and safety expectations
 - `CHANGELOG.md` — notable project changes over time
 - `LICENSE` — repository license
 - `config/foundation.example.json` — example foundation configuration
+- `config/deployment.example.json` — example deployment manifest
 - `config/business-line.example.json` — example line manifest input

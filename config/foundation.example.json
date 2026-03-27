@@ -32,6 +32,7 @@
     "default_home": "~/.gency",
     "home_env": "GENCY_HOME",
     "optional_env_overrides": {
+      "deployment_manifest": "GENCY_DEPLOYMENT_MANIFEST",
       "manifest_root": "GENCY_MANIFEST_ROOT",
       "prompt_root": "GENCY_PROMPT_ROOT",
       "state_root": "GENCY_STATE_ROOT",

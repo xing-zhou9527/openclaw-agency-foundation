@@ -27,6 +27,7 @@ A reasonable default is:
 Suggested env overrides when needed:
 
 - `GENCY_HOME`
+- `GENCY_DEPLOYMENT_MANIFEST`
 - `GENCY_MANIFEST_ROOT`
 - `GENCY_PROMPT_ROOT`
 - `GENCY_STATE_ROOT`
@@ -191,6 +192,17 @@ Recommended default location:
 ```text
 ~/.gency/line-packs/<line_id>/manifest.json
 ```
+
+## Step 9.5 Register the line in the deployment manifest
+
+If you want the runtime to load the line through the full deployment boundary, add it to:
+
+```text
+~/.gency/deployment.json
+```
+
+At minimum, make sure the deployment manifest includes the line in `enabled_lines`.
+If you want explicit per-line paths, use `line_manifest_files`.
 
 ## Step 10. Rehearse the happy path
 

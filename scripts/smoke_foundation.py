@@ -29,6 +29,11 @@ def main() -> None:
         json.dumps(example_manifest, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    deployment_manifest = json.loads((repo / "config" / "deployment.example.json").read_text(encoding="utf-8"))
+    (gency_home / "deployment.json").write_text(
+        json.dumps(deployment_manifest, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 
     from openclaw_agency_foundation.runtime.engine import FoundationEngine
     from openclaw_agency_foundation.runtime.hooks import SubagentCompletionEvent, SubagentCompletionHook
@@ -42,8 +47,7 @@ def main() -> None:
     )
     from openclaw_agency_foundation.runtime.guardrails import FoundationRuleError
 
-    engine = FoundationEngine.from_manifest_dir(
-        line_ids=["marketing"],
+    engine = FoundationEngine.from_deployment_manifest(
         home=gency_home,
     )
 
